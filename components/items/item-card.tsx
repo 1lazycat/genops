@@ -41,12 +41,13 @@ interface ItemCardProps {
 }
 
 export function ItemCard({ item, compact = false }: ItemCardProps) {
-  const { updateItem, deleteItem } = useStore();
+  const { updateItem, deleteItem, items } = useStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(item.title);
   const [editedDescription, setEditedDescription] = useState(item.description);
   const [editedStatus, setEditedStatus] = useState(item.status);
   const [editedPriority, setEditedPriority] = useState(item.priority);
+  const [editedParentId, setEditedParentId] = useState<string | undefined>(item.parentId || undefined);
   const [isAiLoading, setIsAiLoading] = useState<string | null>(null);
   
   const handleSave = () => {
@@ -55,6 +56,7 @@ export function ItemCard({ item, compact = false }: ItemCardProps) {
       description: editedDescription,
       status: editedStatus,
       priority: editedPriority,
+      parentId: editedParentId,
     });
     setIsEditing(false);
     toast.success("Item updated");
@@ -65,6 +67,7 @@ export function ItemCard({ item, compact = false }: ItemCardProps) {
     setEditedDescription(item.description);
     setEditedStatus(item.status);
     setEditedPriority(item.priority);
+    setEditedParentId(item.parentId);
     setIsEditing(false);
   };
   
@@ -123,6 +126,14 @@ export function ItemCard({ item, compact = false }: ItemCardProps) {
       case 'test': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
+  };
+
+  const handleStatusChange = (value: string) => {
+    setEditedStatus(value as 'backlog' | 'todo' | 'in-progress' | 'review' | 'done');
+  };
+
+  const handlePriorityChange = (value: string) => {
+    setEditedPriority(value as 'low' | 'medium' | 'high' | 'critical');
   };
   
   if (compact) {
@@ -221,6 +232,24 @@ export function ItemCard({ item, compact = false }: ItemCardProps) {
                 )}
               </Button>
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Parent</label>
+              <Select
+                value={editedParentId}
+                onValueChange={(value) => setEditedParentId(value as string)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(items).map((parentItem) => (
+                    <SelectItem key={parentItem.id} value={parentItem.id}>
+                      {parentItem.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         ) : (
           <CardTitle>{item.title}</CardTitle>
@@ -231,7 +260,7 @@ export function ItemCard({ item, compact = false }: ItemCardProps) {
             <>
               <Select
                 value={editedStatus}
-                onValueChange={setEditedStatus}
+                onValueChange={handleStatusChange}
               >
                 <SelectTrigger className="w-[120px]">
                   <SelectValue />
@@ -247,7 +276,7 @@ export function ItemCard({ item, compact = false }: ItemCardProps) {
               
               <Select
                 value={editedPriority}
-                onValueChange={setEditedPriority}
+                onValueChange={handlePriorityChange}
               >
                 <SelectTrigger className="w-[120px]">
                   <SelectValue />

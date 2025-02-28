@@ -232,24 +232,24 @@ export function ActivityView() {
                 )}
               </div>
               
-              <Select value={actionFilter || ""} onValueChange={(v) => setActionFilter(v || null)}>
+              <Select value={actionFilter || "all"} onValueChange={(v) => setActionFilter(v !== "all" ? v : null)}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="All actions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All actions</SelectItem>
+                  <SelectItem value="all">All actions</SelectItem>
                   <SelectItem value="create">Created</SelectItem>
                   <SelectItem value="update">Updated</SelectItem>
                   <SelectItem value="delete">Deleted</SelectItem>
                 </SelectContent>
               </Select>
               
-              <Select value={userFilter || ""} onValueChange={(v) => setUserFilter(v || null)}>
+              <Select value={userFilter || "all"} onValueChange={(v) => setUserFilter(v !== "all" ? v : null)}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="All users" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All users</SelectItem>
+                  <SelectItem value="all">All users</SelectItem>
                   {Object.values(users).map(user => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name}

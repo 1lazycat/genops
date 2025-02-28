@@ -36,6 +36,7 @@ export function ItemDetail({ itemId }: ItemDetailProps) {
   const [editedDescription, setEditedDescription] = useState(item?.description || "");
   const [editedStatus, setEditedStatus] = useState(item?.status || "backlog");
   const [editedPriority, setEditedPriority] = useState(item?.priority || "medium");
+  const [editedParentId, setEditedParentId] = useState<string | undefined>(item.parentId || undefined);
   
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<{ score: number; feedback: string[] } | null>(null);
@@ -64,6 +65,7 @@ export function ItemDetail({ itemId }: ItemDetailProps) {
       description: editedDescription,
       status: editedStatus,
       priority: editedPriority,
+      parentId: editedParentId,
     });
     setIsEditing(false);
     toast.success("Item updated");
@@ -177,6 +179,14 @@ export function ItemDetail({ itemId }: ItemDetailProps) {
     if (score >= 70) return "text-amber-600 dark:text-amber-400";
     return "text-red-600 dark:text-red-400";
   };
+
+  const handleStatusChange = (value: string) => {
+    setEditedStatus(value as 'backlog' | 'todo' | 'in-progress' | 'review' | 'done');
+  };
+  
+  const handlePriorityChange = (value: string) => {
+    setEditedPriority(value as 'low' | 'medium' | 'high' | 'critical');
+  };
   
   return (
     <div className="h-full overflow-y-auto p-6">
@@ -280,7 +290,7 @@ export function ItemDetail({ itemId }: ItemDetailProps) {
                   <label className="text-sm font-medium">Status</label>
                   <Select
                     value={editedStatus}
-                    onValueChange={setEditedStatus}
+                    onValueChange={handleStatusChange}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -299,7 +309,7 @@ export function ItemDetail({ itemId }: ItemDetailProps) {
                   <label className="text-sm font-medium">Priority</label>
                   <Select
                     value={editedPriority}
-                    onValueChange={setEditedPriority}
+                    onValueChange={handlePriorityChange}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -309,6 +319,25 @@ export function ItemDetail({ itemId }: ItemDetailProps) {
                       <SelectItem value="medium">Medium</SelectItem>
                       <SelectItem value="high">High</SelectItem>
                       <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Parent</label>
+                  <Select
+                    value={editedParentId}
+                    onValueChange={(value) => setEditedParentId(value as string)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(items).map((parentItem) => (
+                        <SelectItem key={parentItem.id} value={parentItem.id}>
+                          {parentItem.title}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

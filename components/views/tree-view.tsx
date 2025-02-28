@@ -34,3 +34,29 @@ export function TreeView() {
     </div>
   );
 }
+
+// Add linking functionality
+export function linkItems(parentId: string, childId: string) {
+  const { items, updateItem } = useStore.getState();
+  const parentItem = items[parentId];
+  const childItem = items[childId];
+
+  if (!parentItem || !childItem) {
+    throw new Error("Invalid parent or child item ID");
+  }
+
+  // Update parent item to include the child
+  const updatedParent = {
+    ...parentItem,
+    children: [...(parentItem.children || []), childId],
+  };
+
+  // Update child item to reference the parent
+  const updatedChild = {
+    ...childItem,
+    parentId: parentId,
+  };
+
+  updateItem(parentId, updatedParent);
+  updateItem(childId, updatedChild);
+}
