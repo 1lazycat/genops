@@ -300,9 +300,7 @@ export function Sidebar() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Create New{" "}
-              {selectedItemType.charAt(0).toUpperCase() +
-                selectedItemType.slice(1)}
+              Create New {selectedItemType.charAt(0).toUpperCase() + selectedItemType.slice(1)}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCreateItem} className="space-y-4 pt-4">
@@ -312,12 +310,7 @@ export function Sidebar() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                placeholder="Enter description"
-                rows={4}
-              />
+              <Textarea id="description" name="description" placeholder="Enter description" rows={4} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -367,50 +360,35 @@ export function Sidebar() {
               </Select>
             </div>
             <Button type="submit" className="w-full">
-              Create{" "}
-              {selectedItemType.charAt(0).toUpperCase() +
-                selectedItemType.slice(1)}
+              Create {selectedItemType.charAt(0).toUpperCase() + selectedItemType.slice(1)}
             </Button>
           </form>
         </DialogContent>
       </Dialog>
 
       {/* AI Generate Dialog */}
-      <Dialog
-        open={aiGenerateDialogOpen}
-        onOpenChange={setAiGenerateDialogOpen}
-      >
+      <Dialog open={aiGenerateDialogOpen} onOpenChange={setAiGenerateDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Generate{" "}
-              {selectedItemType.charAt(0).toUpperCase() +
-                selectedItemType.slice(1)}{" "}
-              Items with AI
+              Generate {selectedItemType.charAt(0).toUpperCase() + selectedItemType.slice(1)} Items with AI
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <p className="text-sm text-muted-foreground">
-              AI will analyze the parent item and generate appropriate{" "}
-              {selectedItemType} items based on its description.
+              AI will analyze the parent item and generate appropriate {selectedItemType} items based on its description.
             </p>
 
             <div className="space-y-2">
               <Label>Item Type</Label>
-              <Select
-                value={selectedItemType}
-                onValueChange={setSelectedItemType}
-              >
+              <Select value={selectedItemType} onValueChange={setSelectedItemType}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {selectedParentId &&
                     items[selectedParentId] &&
-                    (
-                      validChildTypes[items[selectedParentId].type as string] ||
-                      []
-                    ).map((type: string) => (
+                    (validChildTypes[items[selectedParentId].type as string] || []).map((type: string) => (
                       <SelectItem key={type} value={type}>
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </SelectItem>
@@ -419,11 +397,7 @@ export function Sidebar() {
               </Select>
             </div>
 
-            <Button
-              onClick={handleAIGenerate}
-              className="w-full"
-              disabled={isGenerating}
-            >
+            <Button onClick={handleAIGenerate} className="w-full" disabled={isGenerating}>
               {isGenerating ? "Generating..." : "Generate Items"}
             </Button>
           </div>

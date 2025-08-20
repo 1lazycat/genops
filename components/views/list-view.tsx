@@ -1,53 +1,125 @@
-import React, { useState } from 'react';
-import { Bot } from 'lucide-react';
+"use client";
 
-interface Item {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  created: string;
-  modified: string;
-  children?: Item[];
-}
+import { useState } from "react";
+import { useItemStore, ItemType } from '@/store';
+import { Item, ItemStatus } from '@/lib/types';
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { useDrag, useDrop, DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
-const ListView = () => {
-  const [items, setItems] = useState<Item[]>([
-    // Sample data
-    { id: 1, title: 'Epic 1', description: 'Description 1', status: 'Open', priority: 'High', created: '2023-01-01', modified: '2023-01-02', children: [
-      { id: 2, title: 'User Story 1', description: 'Description 2', status: 'In Progress', priority: 'Medium', created: '2023-01-03', modified: '2023-01-04', children: [
-        { id: 3, title: 'Task 1', description: 'Description 3', status: 'Done', priority: 'Low', created: '2023-01-05', modified: '2023-01-06' },
-        { id: 4, title: 'Task 2', description: 'Description 4', status: 'Open', priority: 'High', created: '2023-01-07', modified: '2023-01-08' }
-      ] }
-    ] }
-  ]);
+export function ListView() {
+  const { items, updateItem } = useItemStore();
+  const [filterType, setFilterType] = useState<string>("all");
 
-  const renderItems = (items: Item[]) => {
-    return items.map((item: Item) => (
-      <div key={item.id} className="p-4 border rounded mb-2">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-lg font-bold">{item.title}</h3>
-            <p>{item.description}</p>
-            <p>Status: {item.status}</p>
-            <p>Priority: {item.priority}</p>
-            <p>Created: {item.created}</p>
-            <p>Modified: {item.modified}</p>
-          </div>
-          <button className="ml-4 p-2 bg-blue-500 text-white rounded"><Bot /></button>
-        </div>
-        {item.children && <div className="ml-4 mt-2">{renderItems(item.children)}</div>}
-      </div>
-    ));
+  const filteredItems = Object.values(items).filter(item => {
+    if (filterType === "all") return true;
+    return item.type === filterType;
+  });
+
+  const moveItem = (draggedId: string, targetStatus: ItemStatus) => {
+    updateItem(draggedId, { status: targetStatus });
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">List View</h2>
-      {renderItems(items)}
+    <DndProvider backend={HTML5Backend}>
+      <div className="h-[calc(100vh-3.5rem)] overflow-hidden">
+        <div className="p-4 border-b flex justify-between items-center">
+          <h2 className="text-xl font-semibold">List View</h2>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Filter by type:</span>
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Items</SelectItem>
+                <SelectItem value="epic">Epics</SelectItem>
+                <SelectItem value="story">Stories</SelectItem>
+                <SelectItem value="task">Tasks</SelectItem>
+                <SelectItem value="test">Tests</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="p-4 space-y-4">
+          {filteredItems.map(item => (
+            <ListItem key={item.id} item={item} moveItem={moveItem} />
+          ))}
+        </div>
+      </div>
+    </DndProvider>
+  );
+}
+
+function ListItem({ item, moveItem }: { item: Item; moveItem: (draggedId: string, targetStatus: ItemStatus) => void }) {
+  const [, ref] = useDrag({
+    type: 'ITEM',
+    item: { id: item.id },
+  });
+
+  const [, drop] = useDrop({
+    accept: 'ITEM',
+    hover: (draggedItem: { id: string }) => {
+      if (draggedItem.id !== item.id) {
+        moveItem(draggedItem.id, item.status);
+      }
+    },
+  });
+
+  return (
+    <div ref={node => ref(drop(node))} className={cn(
+      "p-4 rounded-md text-sm border flex justify-between items-center",
+      getTypeColor(item.type)
+    )}>
+      <div>
+        <div className="font-medium truncate">{item.title}</div>
+        <div className="text-xs text-muted-foreground">{format(new Date(item.createdAt), "MMM d, yyyy")}</div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Badge 
+          variant="outline" 
+          className={cn("text-xs", getTypeColor(item.type))}
+        >
+          {item.type}
+        </Badge>
+        <Badge 
+          variant="outline" 
+          className={cn("text-xs", getStatusColor(item.status))}
+        >
+          {item.status}
+        </Badge>
+      </div>
     </div>
   );
-};
+}
 
-export { ListView };
+function getTypeColor(type: ItemType) {
+  switch (type) {
+    case ItemType.Epic: return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+    case ItemType.Story: return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+    case ItemType.Task: return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
+    case ItemType.Test: return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+  }
+}
+
+function getStatusColor(status: ItemStatus) {
+  switch (status) {
+    case 'backlog': return 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300';
+    case 'todo': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+    case 'in-progress': return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
+    case 'review': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+    case 'done': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+  }
+}

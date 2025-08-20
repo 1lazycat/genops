@@ -29,15 +29,11 @@ export interface User {
 
 export interface AuditLog {
   id: string;
-  itemId: string;
-  userId: string;
-  action: 'create' | 'update' | 'delete';
+  action: string;
   timestamp: string;
-  changes: {
-    field: string;
-    oldValue: any;
-    newValue: any;
-  }[];
+  user: string;
+  title?: string;
+  changes: Array<{ field: string; oldValue: string; newValue: string }>;
 }
 
 export interface AIOperation {

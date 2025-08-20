@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Item } from "@/lib/types";
-import { useStore } from "@/lib/store";
+import { Item, ItemType } from "@/lib/types";
+import { useItemStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { Bot, MoreHorizontal, Pencil, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ interface ItemCardProps {
 }
 
 export function ItemCard({ item, compact = false }: ItemCardProps) {
-  const { updateItem, deleteItem, items } = useStore();
+  const { updateItem, deleteItem, items } = useItemStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(item.title);
   const [editedDescription, setEditedDescription] = useState(item.description);
@@ -118,12 +118,12 @@ export function ItemCard({ item, compact = false }: ItemCardProps) {
     }
   };
   
-  const getTypeColor = (type: string) => {
+  const getTypeColor = (type: ItemType) => {
     switch (type) {
-      case 'epic': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'story': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'task': return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
-      case 'test': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      case ItemType.Epic: return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case ItemType.Story: return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case ItemType.Task: return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
+      case ItemType.Test: return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
